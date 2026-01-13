@@ -52,7 +52,10 @@ if [ "$WHMCS_CRON_ENABLED" = "true" ] || [ "$WHMCS_CRON_DAILY_ENABLED" = "true" 
     
     chmod 0644 /etc/cron.d/whmcs-cron
     touch /var/log/whmcs_cron.log /var/log/whmcs_cron_daily.log
-    cron
+    
+    echo "Démarrage de cron..."
+    service cron start
+    echo "✓ Cron démarré"
 fi
 
 apachectl -k stop >/dev/null 2>&1 || true
