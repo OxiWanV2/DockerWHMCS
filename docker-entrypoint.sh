@@ -14,7 +14,7 @@ fi
 
 if [ "$APACHE_PORT" != "8080" ]; then
     echo "Listen ${APACHE_PORT}" > /etc/apache2/ports.conf
-    sed -i "s/:8080>/:${APACHE_PORT}>/g" /etc/apache2/sites-available/000-default.conf
+    sed -i "s/:8080>/:8080>/g" /etc/apache2/sites-available/000-default.conf
 fi
 
 chown -R www-data:www-data /var/www/html 2>/dev/null || true
