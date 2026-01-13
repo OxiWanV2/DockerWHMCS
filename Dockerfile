@@ -49,31 +49,28 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
 
 RUN set -eux; \
     PHP_VERSION=$(php -r "echo PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION;"); \
-    echo "=== Détection PHP version: ${PHP_VERSION} ==="; \
-    \
     cd /tmp; \
     curl -fsSL -o ioncube.tar.gz https://downloads.ioncube.com/loader_downloads/ioncube_loaders_lin_x86-64.tar.gz; \
     tar -xzf ioncube.tar.gz; \
-    \
-    echo "=== Loaders IonCube disponibles ==="; \
-    ls -1 ioncube/ioncube_loader_lin_*.so | grep -v "_ts.so" | sort; \
-    \
     LOADER_FILE="ioncube/ioncube_loader_lin_${PHP_VERSION}.so"; \
-    \
     if [ ! -f "$LOADER_FILE" ]; then \
         echo "ERROR: IonCube loader non disponible pour PHP ${PHP_VERSION}"; \
-        echo "Versions supportées: 7.4, 8.1, 8.2, 8.3"; \
-        ls -la ioncube/; \
         exit 1; \
     fi; \
-    \
-    echo "=== Installation: ${LOADER_FILE} ==="; \
     EXT_DIR=$(php-config --extension-dir); \
     cp "$LOADER_FILE" "${EXT_DIR}/ioncube_loader.so"; \
     echo "zend_extension=ioncube_loader.so" > /usr/local/etc/php/conf.d/00-ioncube.ini; \
     rm -rf /tmp/ioncube*; \
-    \
-    php -v | grep -i ioncube && echo "✓ IonCube installé avec succès" || (echo "✗ Erreur installation IonCube" && exit 1)
+    php -v | grep -i ioncube || exit 1
+
+RUN { \
+    echo "memory_limit = 256M"; \
+    echo "upload_max_filesize = 64M"; \
+    echo "post_max_size = 64M"; \
+    echo "max_execution_time = 300"; \
+    echo "max_input_vars = 5000"; \
+    echo "date.timezone = Europe/Paris"; \
+    } > /usr/local/etc/php/conf.d/whmcs-defaults.ini
 
 RUN a2enmod rewrite \
     && echo "ServerName localhost" > /etc/apache2/conf-available/servername.conf \
@@ -82,6 +79,9 @@ RUN a2enmod rewrite \
     && echo "  AllowOverride All" >> /etc/apache2/conf-available/htaccess.conf \
     && echo "</Directory>" >> /etc/apache2/conf-available/htaccess.conf \
     && a2enconf htaccess
+
+RUN echo "Listen 8080" > /etc/apache2/ports.conf \
+    && sed -i "s/:80>/:8080>/g" /etc/apache2/sites-available/000-default.conf
 
 RUN mkdir -p /var/www/html/attachments \
     /var/www/html/downloads \
@@ -96,7 +96,7 @@ RUN mkdir -p /var/www/html/attachments \
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-EXPOSE ${APACHE_PORT}
+EXPOSE 8080
 
 WORKDIR /var/www/html
 
