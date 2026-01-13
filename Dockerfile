@@ -15,7 +15,7 @@ ENV PHP_MEMORY_LIMIT=256M \
     WHMCS_CRON_DAILY_MINUTE=0
 
 LABEL org.opencontainers.image.source="https://github.com/OxiWanV2/DockerWHMCS"
-LABEL org.opencontainers.image.description="Image Docker pour héberger WHMCS - Support PHP 7.4 à 8.3"
+LABEL org.opencontainers.image.description="Image Docker pour héberger WHMCS - Support PHP 7.4, 8.1, 8.2, 8.3"
 
 RUN apt-get update && apt-get install -y \
     libcurl4-openssl-dev \
@@ -47,19 +47,33 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     soap \
     sockets
 
-RUN PHP_VERSION=$(php -r "echo PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION;") \
-    && cd /tmp \
-    && curl -o ioncube.tar.gz https://downloads.ioncube.com/loader_downloads/ioncube_loaders_lin_x86-64.tar.gz \
-    && tar -xzf ioncube.tar.gz \
-    && IONCUBE_FILE=$(ls ioncube/ioncube_loader_lin_${PHP_VERSION}*.so 2>/dev/null | head -n 1) \
-    && if [ -z "$IONCUBE_FILE" ]; then \
-         echo "ERROR: IonCube loader not found for PHP ${PHP_VERSION}"; \
-         ls -la ioncube/; \
-         exit 1; \
-       fi \
-    && cp "$IONCUBE_FILE" $(php-config --extension-dir)/ioncube_loader.so \
-    && echo "zend_extension=ioncube_loader.so" > /usr/local/etc/php/conf.d/00-ioncube.ini \
-    && rm -rf /tmp/ioncube*
+RUN set -eux; \
+    PHP_VERSION=$(php -r "echo PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION;"); \
+    echo "=== Détection PHP version: ${PHP_VERSION} ==="; \
+    \
+    cd /tmp; \
+    curl -fsSL -o ioncube.tar.gz https://downloads.ioncube.com/loader_downloads/ioncube_loaders_lin_x86-64.tar.gz; \
+    tar -xzf ioncube.tar.gz; \
+    \
+    echo "=== Loaders IonCube disponibles ==="; \
+    ls -1 ioncube/ioncube_loader_lin_*.so | grep -v "_ts.so" | sort; \
+    \
+    LOADER_FILE="ioncube/ioncube_loader_lin_${PHP_VERSION}.so"; \
+    \
+    if [ ! -f "$LOADER_FILE" ]; then \
+        echo "ERROR: IonCube loader non disponible pour PHP ${PHP_VERSION}"; \
+        echo "Versions supportées: 7.4, 8.1, 8.2, 8.3"; \
+        ls -la ioncube/; \
+        exit 1; \
+    fi; \
+    \
+    echo "=== Installation: ${LOADER_FILE} ==="; \
+    EXT_DIR=$(php-config --extension-dir); \
+    cp "$LOADER_FILE" "${EXT_DIR}/ioncube_loader.so"; \
+    echo "zend_extension=ioncube_loader.so" > /usr/local/etc/php/conf.d/00-ioncube.ini; \
+    rm -rf /tmp/ioncube*; \
+    \
+    php -v | grep -i ioncube && echo "✓ IonCube installé avec succès" || (echo "✗ Erreur installation IonCube" && exit 1)
 
 RUN a2enmod rewrite \
     && echo "ServerName localhost" > /etc/apache2/conf-available/servername.conf \

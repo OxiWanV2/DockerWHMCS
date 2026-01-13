@@ -1,14 +1,13 @@
 # WHMCS Docker Image
 
-Image Docker optimisée pour héberger WHMCS avec support PHP 7.4 à 8.3, Apache et IonCube Loader.
+Image Docker optimisée pour héberger WHMCS avec PHP, Apache et IonCube Loader pré-installés.
 
 ## Versions disponibles
 
-- `ghcr.io/OxiWanV2/DockerWHMCS:php7.4` - PHP 7.4
-- `ghcr.io/OxiWanV2/DockerWHMCS:php8.0` - PHP 8.0
-- `ghcr.io/OxiWanV2/DockerWHMCS:php8.1` - PHP 8.1 (recommandé)
-- `ghcr.io/OxiWanV2/DockerWHMCS:php8.2` - PHP 8.2
-- `ghcr.io/OxiWanV2/DockerWHMCS:php8.3` - PHP 8.3
+- `ghcr.io/OxiWanV2/DockerWHMCS:php7.4` - PHP 7.4 + IonCube
+- `ghcr.io/OxiWanV2/DockerWHMCS:php8.1` - PHP 8.1 + IonCube ⭐ (recommandé)
+- `ghcr.io/OxiWanV2/DockerWHMCS:php8.2` - PHP 8.2 + IonCube
+- `ghcr.io/OxiWanV2/DockerWHMCS:php8.3` - PHP 8.3 + IonCube
 - `ghcr.io/OxiWanV2/DockerWHMCS:latest` - PHP 8.1 par défaut
 
 ## Variables d'environnement
