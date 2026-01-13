@@ -51,8 +51,14 @@ RUN PHP_VERSION=$(php -r "echo PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION;") \
     && cd /tmp \
     && curl -o ioncube.tar.gz https://downloads.ioncube.com/loader_downloads/ioncube_loaders_lin_x86-64.tar.gz \
     && tar -xzf ioncube.tar.gz \
-    && mv ioncube/ioncube_loader_lin_${PHP_VERSION}.so $(php-config --extension-dir)/ \
-    && echo "zend_extension=ioncube_loader_lin_${PHP_VERSION}.so" > /usr/local/etc/php/conf.d/00-ioncube.ini \
+    && IONCUBE_FILE=$(ls ioncube/ioncube_loader_lin_${PHP_VERSION}*.so 2>/dev/null | head -n 1) \
+    && if [ -z "$IONCUBE_FILE" ]; then \
+         echo "ERROR: IonCube loader not found for PHP ${PHP_VERSION}"; \
+         ls -la ioncube/; \
+         exit 1; \
+       fi \
+    && cp "$IONCUBE_FILE" $(php-config --extension-dir)/ioncube_loader.so \
+    && echo "zend_extension=ioncube_loader.so" > /usr/local/etc/php/conf.d/00-ioncube.ini \
     && rm -rf /tmp/ioncube*
 
 RUN a2enmod rewrite \
