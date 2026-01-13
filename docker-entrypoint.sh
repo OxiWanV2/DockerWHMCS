@@ -20,6 +20,11 @@ fi
 chown -R www-data:www-data /var/www/html/attachments /var/www/html/downloads /var/www/html/templates_c 2>/dev/null || true
 chmod -R 775 /var/www/html/attachments /var/www/html/downloads /var/www/html/templates_c 2>/dev/null || true
 
+if [ -f /var/www/html/configuration.php ]; then
+    chown www-data:www-data /var/www/html/configuration.php
+    chmod 664 /var/www/html/configuration.php
+fi
+
 if [ "$WHMCS_CRON_ENABLED" = "true" ] || [ "$WHMCS_CRON_DAILY_ENABLED" = "true" ]; then
     echo "SHELL=/bin/sh" > /etc/cron.d/whmcs-cron
     echo "PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin" >> /etc/cron.d/whmcs-cron
