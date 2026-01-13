@@ -17,12 +17,19 @@ if [ "$APACHE_PORT" != "8080" ]; then
     sed -i "s/:8080>/:${APACHE_PORT}>/g" /etc/apache2/sites-available/000-default.conf
 fi
 
-chown -R www-data:www-data /var/www/html/attachments /var/www/html/downloads /var/www/html/templates_c 2>/dev/null || true
+chown -R www-data:www-data /var/www/html 2>/dev/null || true
 chmod -R 775 /var/www/html/attachments /var/www/html/downloads /var/www/html/templates_c 2>/dev/null || true
 
 if [ -f /var/www/html/configuration.php ]; then
-    chown www-data:www-data /var/www/html/configuration.php
     chmod 664 /var/www/html/configuration.php
+fi
+
+if [ -f /var/www/html/.htaccess ]; then
+    chmod 664 /var/www/html/.htaccess
+fi
+
+if [ -d /var/www/html/crons ]; then
+    chmod 755 /var/www/html/crons
 fi
 
 if [ "$WHMCS_CRON_ENABLED" = "true" ] || [ "$WHMCS_CRON_DAILY_ENABLED" = "true" ]; then
