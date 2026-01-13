@@ -32,6 +32,11 @@ if [ -d /var/www/html/crons ]; then
     chmod 755 /var/www/html/crons
 fi
 
+if [ -f /var/www/html/crons/cron.php ]; then
+    echo "Exécution initiale du cron WHMCS..."
+    su -s /bin/bash www-data -c "/usr/local/bin/php -q /var/www/html/crons/cron.php" >> /tmp/whmcs_cron_init.log 2>&1 || true
+fi
+
 if [ "$WHMCS_CRON_ENABLED" = "true" ] || [ "$WHMCS_CRON_DAILY_ENABLED" = "true" ]; then
     echo "SHELL=/bin/sh" > /etc/cron.d/whmcs-cron
     echo "PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin" >> /etc/cron.d/whmcs-cron
