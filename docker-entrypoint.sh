@@ -57,4 +57,6 @@ if [ "$WHMCS_CRON_ENABLED" = "true" ] || [ "$WHMCS_CRON_DAILY_ENABLED" = "true" 
     echo "✓ Cron configuré"
 fi
 
+rm -f /var/run/apache2/apache2.pid 2>/dev/null || true
+
 exec "$@"
