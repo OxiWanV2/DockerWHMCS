@@ -29,6 +29,7 @@ RUN apt-get update && apt-get install -y \
     unzip \
     git \
     cron \
+    supervisor \
     && rm -rf /var/lib/apt/lists/*
 
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
@@ -93,6 +94,7 @@ RUN mkdir -p /var/www/html/attachments \
     /var/www/html/templates_c \
     && chmod 664 /var/www/html/configuration.php
 
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
@@ -101,4 +103,4 @@ EXPOSE 8080
 WORKDIR /var/www/html
 
 ENTRYPOINT ["docker-entrypoint.sh"]
-CMD ["apache2-foreground"]
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
