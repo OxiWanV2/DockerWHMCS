@@ -14,7 +14,7 @@ fi
 
 if [ "$APACHE_PORT" != "8080" ]; then
     echo "Listen ${APACHE_PORT}" > /etc/apache2/ports.conf
-    sed -i "s/:8080>/:8080>/g" /etc/apache2/sites-available/000-default.conf
+    sed -i "s/:8080>/:${APACHE_PORT}>/g" /etc/apache2/sites-available/000-default.conf
 fi
 
 chown -R www-data:www-data /var/www/html 2>/dev/null || true
@@ -52,6 +52,8 @@ if [ "$WHMCS_CRON_ENABLED" = "true" ] || [ "$WHMCS_CRON_DAILY_ENABLED" = "true" 
     
     chmod 0644 /etc/cron.d/whmcs-cron
     touch /var/log/whmcs_cron.log /var/log/whmcs_cron_daily.log
+    chown www-data:www-data /var/log/whmcs_cron.log /var/log/whmcs_cron_daily.log
+    chmod 666 /var/log/whmcs_cron.log /var/log/whmcs_cron_daily.log
     echo "✓ Cron configuré"
 fi
 
