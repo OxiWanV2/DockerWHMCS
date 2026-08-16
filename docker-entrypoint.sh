@@ -1,7 +1,6 @@
 #!/bin/bash
 set -e
 
-# Configuration PHP runtime
 if [ -n "$PHP_MEMORY_LIMIT" ] || [ -n "$PHP_TIMEZONE" ]; then
     cat > /usr/local/etc/php/conf.d/whmcs-runtime.ini <<EOF
 memory_limit = ${PHP_MEMORY_LIMIT}
@@ -13,9 +12,6 @@ date.timezone = ${PHP_TIMEZONE}
 EOF
 fi
 
-# Port d'écoute Apache : toujours régénéré à partir de APACHE_PORT (fix : l'ancienne
-# condition `!= "8080"` empêchait la réécriture quand la variable d'environnement
-# n'était pas transmise au conteneur, Apache restait alors bloqué sur 8080).
 APACHE_PORT="${APACHE_PORT:-8080}"
 echo "Listen ${APACHE_PORT}" > /etc/apache2/ports.conf
 sed -i -E "s/:[0-9]+>/:${APACHE_PORT}>/g" /etc/apache2/sites-available/000-default.conf
@@ -59,7 +55,6 @@ if [ "$WHMCS_CRON_ENABLED" = "true" ] || [ "$WHMCS_CRON_DAILY_ENABLED" = "true" 
     echo "✓ Cron configuré"
 fi
 
-# Nettoyage du pidfile Apache pour éviter un conflit au (re)démarrage.
 rm -f /var/run/apache2/apache2.pid 2>/dev/null || true
 
 exec "$@"
